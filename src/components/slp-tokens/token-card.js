@@ -9,6 +9,7 @@ import { Container, Row, Col, Card } from 'react-bootstrap'
 // Local libraries
 import InfoButton from './info-button'
 import SendTokenButton from './send-token-button'
+import SellButton from './sell-button'
 
 function TokenCard (props) {
   return (
@@ -41,6 +42,11 @@ function TokenCard (props) {
                 <Col>
                   <InfoButton token={props.token} />
                 </Col>
+
+                <Col>
+                  <SellButton token={props.token} appData={props.appData} />
+                </Col>
+
                 <Col>
                   <SendTokenButton
                     token={props.token}
