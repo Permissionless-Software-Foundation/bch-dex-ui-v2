@@ -1,0 +1,4 @@
+node_modules/
+build/
+android/app/src/main/assets/public/
+
