@@ -34,7 +34,7 @@ class SellButton extends React.Component {
   }
 
   render () {
-    console.log(`props.token: ${JSON.stringify(this.state.token, null, 2)}`)
+    // console.log(`props.token: ${JSON.stringify(this.state.token, null, 2)}`)
 
     return (
       <>
@@ -194,7 +194,7 @@ class SellButton extends React.Component {
         data: { order }
       }
       const result = await axios(options)
-      console.log('result.data: ', result.data)
+      // console.log('result.data: ', result.data)
 
       const p2wdbHash = result.data.hash
 

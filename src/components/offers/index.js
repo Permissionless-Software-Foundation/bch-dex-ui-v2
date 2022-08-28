@@ -167,13 +167,13 @@ class Offers extends React.Component {
     }
 
     const result = await axios.request(options)
-    console.log('result.data: ', result.data)
+    // console.log('result.data: ', result.data)
     const p2wdbHash = result.data.hash
 
     // Add link to output
     const modalBody = []
     modalBody.push('Success!')
-    modalBody.push(<p><a href={`https://p2wdb.fullstack.cash/entry/hash/${p2wdbHash}`} target='_blank' rel='noreferrer'>P2WDB Entry</a></p>)
+    modalBody.push(<a href={`https://p2wdb.fullstack.cash/entry/hash/${p2wdbHash}`} target='_blank' rel='noreferrer'>P2WDB Entry</a>)
     modalBody.push('What happens next:')
     modalBody.push('The money has not yet left your wallet! It is still under your control.')
     modalBody.push('If the sellers node is online, they will accept the Counter Offer you just generated in a few minutes.')
@@ -193,7 +193,7 @@ class Offers extends React.Component {
         data: {}
       }
       const result = await axios.request(options)
-      console.log('result.data: ', result.data)
+      // console.log('result.data: ', result.data)
 
       return result.data
     } catch (err) {
