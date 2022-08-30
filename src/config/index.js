@@ -3,7 +3,8 @@
 */
 
 const config = {
-  server: 'http://localhost:5700'
+  // server: 'http://localhost:5700'
+  server: 'https://dex-api.fullstack.cash'
 }
 
 export default config
