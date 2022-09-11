@@ -4,6 +4,9 @@
 
 // Global npm libraries
 import React from 'react'
+import { Container, Row, Col } from 'react-bootstrap'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleQuestion } from '@fortawesome/free-solid-svg-icons'
 
 // Local Libraries
 import WebWalletWarning from './warning'
@@ -16,24 +19,29 @@ class BchWallet extends React.Component {
     super(props)
 
     this.state = {
-      appData: props.appData,
-      bchWallet: props.appData.bchWallet,
-      bchWalletState: props.appData.bchWalletState,
-      delMnemonic: props.appData.delMnemonic,
-      setMnemonic: props.appData.setMnemonic
+      appData: props.appData
     }
   }
 
   render () {
     return (
       <>
+        <Container>
+          <Row>
+            <Col style={{ textAlign: 'right' }}>
+              <a href='https://youtu.be/0R00cppN0fA' target='_blank' rel='noreferrer'>
+                <FontAwesomeIcon icon={faCircleQuestion} size='lg' />
+              </a>
+            </Col>
+          </Row>
+        </Container>
         <WebWalletWarning />
         <br />
-        <WalletSummary bchWallet={this.state.bchWallet} bchWalletState={this.state.bchWalletState} appData={this.state.appData} />
+        <WalletSummary appData={this.state.appData} />
         <br />
-        <WalletClear delMnemonic={this.state.delMnemonic} />
+        <WalletClear appData={this.state.appData} />
         <br />
-        <WalletImport bchWallet={this.state.bchWallet} setMnemonic={this.state.setMnemonic} />
+        <WalletImport appData={this.state.appData} />
       </>
     )
   }

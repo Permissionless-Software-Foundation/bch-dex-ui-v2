@@ -9,11 +9,10 @@ import React from 'react'
 import { Button } from 'react-bootstrap'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faRedo } from '@fortawesome/free-solid-svg-icons'
+import Jdenticon from '@chris.troutner/react-jdenticon'
 
 // Local libraries
 import WaitingModal from '../waiting-modal'
-
-// let _this
 
 class RefreshTokenBalance extends React.Component {
   constructor (props) {
@@ -27,9 +26,11 @@ class RefreshTokenBalance extends React.Component {
       hideWaitingModal: true
     }
 
-    this.handleRefreshBalance = this.handleRefreshBalance.bind(this)
+    // Function handle for downloading token icons. Passed from parent component.
+    this.lazyLoadTokenIcons = props.lazyLoadTokenIcons
 
-    // _this = this
+    // Bind the 'this' object to event handlers.
+    this.handleRefreshBalance = this.handleRefreshBalance.bind(this)
   }
 
   render () {
@@ -61,6 +62,7 @@ class RefreshTokenBalance extends React.Component {
       const wallet = this.state.appData.bchWallet
 
       // Update the wallet UTXOs
+      await wallet.initialize()
       const tokenList = await wallet.listTokens()
       // console.log(`tokenList: ${JSON.stringify(tokenList, null, 2)}`)
 
@@ -75,7 +77,10 @@ class RefreshTokenBalance extends React.Component {
         if (existingToken[0] && existingToken[0].icon) {
           thisToken.icon = existingToken[0].icon
         } else {
-          thisToken.icon = null
+          // If this is a new token, generate an icon.
+          thisToken.icon = (<Jdenticon size='100' value={thisToken.tokenId} />)
+          // Signal to lazy load the token icon (if it has one).
+          thisToken.iconNeedsDownload = true
         }
       }
 
@@ -96,6 +101,9 @@ class RefreshTokenBalance extends React.Component {
         // Wipe the modal body
         modalBody: []
       })
+
+      // Lazy load icons for any new tokens.
+      await this.lazyLoadTokenIcons()
 
       return newAppData
     } catch (err) {

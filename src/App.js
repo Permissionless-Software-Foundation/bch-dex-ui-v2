@@ -78,8 +78,12 @@ class App extends React.Component {
 
     // These values are set by load-localstorage.js when it reads Local Storage.
     this.mnemonic = undefined
-    this.setMnemonic = undefined
-    this.delMnemonic = undefined
+    this.lsState = undefined // local storage state
+    this.setLSState = undefined
+    this.delLSState = undefined
+
+    // Bind the 'this' object to event handlers
+    this.passMnemonic = this.passMnemonic.bind(this)
 
     _this = this
   }
@@ -88,10 +92,6 @@ class App extends React.Component {
     try {
       this.addToModal('Loading minimal-slp-wallet')
       await this.asyncLoad.loadWalletLib()
-
-      this.addToModal('Loading bch-sweep-lib')
-      const Sweep = await this.asyncLoad.loadSweepLib()
-      this.setState({ Sweep })
 
       // Update the list of potential back end servers.
       this.addToModal('Getting alternative servers')
@@ -102,7 +102,7 @@ class App extends React.Component {
 
       // Initialize the BCH wallet with the currently selected server.
       this.addToModal('Initializing wallet')
-      const bchWallet = await this.asyncLoad.initWallet(serverUrl, this.mnemonic, this.setMnemonic, this.updateBchWalletState)
+      const bchWallet = await this.asyncLoad.initWallet(serverUrl, this.mnemonic, this.setLSState, this.updateBchWalletState)
       this.setState({
         bchWallet
       })
@@ -155,12 +155,14 @@ class App extends React.Component {
 
       // Functions
       updateBchWalletState: this.updateBchWalletState,
-      setMnemonic: this.setMnemonic,
-      delMnemonic: this.delMnemonic,
+      setLSState: this.setLSState,
+      delLSState: this.delLSState,
 
       servers: this.state.servers, // Alternative back end servers
 
-      Sweep: this.state.Sweep // Sweep library
+      Sweep: this.state.Sweep, // Sweep library
+
+      wallet: this.state.bchWallet
     }
 
     return (
@@ -185,7 +187,7 @@ class App extends React.Component {
         }
 
         <SelectServerButton menuHandler={this.onMenuClick} />
-        <Footer />
+        <Footer appData={appData} />
       </>
     )
   }
@@ -212,14 +214,19 @@ class App extends React.Component {
     })
   }
 
-  // This function is used to retrieve the mnemonic from local storage, which
+  // This function is used to retrieve the mnemonic from LocalStorage, which
   // is handled by a child component (load-localstorage.js)
-  passMnemonic (mnemonic, setMnemonic, delMnemonic) {
+  passMnemonic (lsState, setLSState, delLSState) {
     // console.log(`mnemonic loaded from local storage: ${mnemonic}`)
 
-    _this.mnemonic = mnemonic
-    _this.setMnemonic = setMnemonic
-    _this.delMnemonic = delMnemonic
+    // Get the mnemonic from local storage.
+    this.mnemonic = lsState.mnemonic
+
+    // Save handles to the LocalStorage State, as well as the functions to save
+    // and delete items from the LocalStorage.
+    this.lsState = lsState
+    this.setLSState = setLSState
+    this.delLSState = delLSState
   }
 
   // This function is passed to child components in order to update the wallet
