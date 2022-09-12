@@ -7,6 +7,8 @@ import React from 'react'
 import { Container, Row, Card, Col, Button, Spinner } from 'react-bootstrap'
 import axios from 'axios'
 import Jdenticon from '@chris.troutner/react-jdenticon'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faRedo } from '@fortawesome/free-solid-svg-icons'
 
 // Local libraries
 import config from '../../config'
@@ -23,8 +25,13 @@ class NFTs extends React.Component {
       appData: props.appData,
       offers: [],
       iconsAreLoaded: false,
-      reloadInterval: null
+      reloadInterval: null,
+      page: 0
     }
+
+    // Bind this object to event handlers
+    this.handleOffers = this.handleOffers.bind(this)
+    this.handleNextPage = this.handleNextPage.bind(this)
   }
 
   // Executes when the component mounts.
@@ -38,11 +45,10 @@ class NFTs extends React.Component {
     clearInterval(oldInterval)
 
     // Get data and update the table periodically.
-    const reloadInterval = setInterval(async () => {
-      await this.handleOffers()
-    }, 30000)
-
-    this.setState({ reloadInterval })
+    // const reloadInterval = setInterval(async () => {
+    //   await this.handleOffers()
+    // }, 30000)
+    // this.setState({ reloadInterval })
   }
 
   render () {
@@ -52,7 +58,11 @@ class NFTs extends React.Component {
       <>
         <Container>
           <Row>
-            <Col xs={6} />
+            <Col xs={6}>
+              <Button variant='success' onClick={this.handleOffers}>
+                <FontAwesomeIcon icon={faRedo} size='lg' /> Refresh
+              </Button>
+            </Col>
 
             <Col xs={4} style={{ textAlign: 'right' }}>
               {
@@ -70,15 +80,46 @@ class NFTs extends React.Component {
           <Row>
             {tokenCards}
           </Row>
+
+          <Row>
+            <Col xs={6}>
+              <Button variant='success' onClick={this.handleNextPage}>
+                <FontAwesomeIcon icon={faRedo} size='lg' /> Load More
+              </Button>
+            </Col>
+            <Col />
+          </Row>
         </Container>
       </>
     )
   }
 
+  async handleNextPage (event) {
+    console.log('nextPage() called.')
+    let nextPage = this.state.page
+    nextPage++
+    console.log(`nextPage: ${nextPage}`)
+
+    // const existingOffers = this.state.offers
+    // console.log('existingOffers: ', existingOffers)
+
+    const newOffers = await this.getNftOffers(nextPage)
+    console.log('newOffers: ', newOffers)
+
+    const offers = this.combineOffers(newOffers)
+    console.log('handleNextPage combined offers: ', offers)
+
+    this.setState({
+      offers
+    })
+
+    this.lazyLoadTokenIcons()
+  }
+
   async handleOffers () {
     try {
       const offers = await this.getNftOffers()
-      console.log('offers: ', offers)
+      // console.log('offers: ', offers)
 
       this.setState({
         offers
@@ -90,11 +131,11 @@ class NFTs extends React.Component {
   }
 
   // REST request to get Offer data from bch-dex
-  async getNftOffers () {
+  async getNftOffers (page = 0) {
     try {
       const options = {
         method: 'GET',
-        url: `${SERVER}offer/list/`,
+        url: `${SERVER}offer/list/nft/${page}`,
         data: {}
       }
       const result = await axios.request(options)
@@ -102,54 +143,66 @@ class NFTs extends React.Component {
 
       const rawOffers = result.data
 
-      // Filter out just the NFTs and simple NFTs.
-      const nftOffers = rawOffers.filter((x) => {
-        const displayCategory = x.displayCategory
-        const isNft = displayCategory === 'nft'
-        const isSimpleNft = displayCategory === 'simple-nft'
+      return rawOffers
+    } catch (err) {
+      console.error('Error in getOffers() ', err)
+      return []
+    }
+  }
 
-        if (isNft || isSimpleNft) return true
+  // This function takes in an array of new Offers and combines it with the
+  // array of existing offers in the app state.
+  combineOffers (newOffers) {
+    const existingOffers = this.state.offers
+    const combinedOffers = []
 
-        return false
-      })
-      // console.log(`nftOffers: ${JSON.stringify(nftOffers, null, 2)}`)
+    console.log('existingOffers: ', existingOffers)
 
-      const existingOffers = this.state.offers
-      const combinedOffers = []
+    // Combine the new offers and the existing offers
+    const allOffers = existingOffers.concat(newOffers)
 
-      // Loop through each array. Skip the ones that already exist in the
-      // existingOffers array.
-      for (let i = 0; i < nftOffers.length; i++) {
-        const nftOffer = nftOffers[i]
-        let currentOffer = nftOffer
+    // Loop through each array. Skip the ones that already exist in the
+    // existingOffers array.
+    for (let i = 0; i < allOffers.length; i++) {
+      const thisOffer = allOffers[i]
+      let currentOffer = thisOffer
 
-        for (let j = 0; j < existingOffers.length; j++) {
-          const existingOffer = existingOffers[j]
+      for (let j = 0; j < existingOffers.length; j++) {
+        const existingOffer = existingOffers[j]
 
-          if (nftOffer.tokenId === existingOffer.tokenId) {
-            // console.log('Existing offer found. Replacing new data with old.')
-            // console.log('existingOffer: ', existingOffer)
-            // console.log('nftOffer: ', nftOffer)
+        if (thisOffer.tokenId === existingOffer.tokenId) {
+          // console.log('Existing offer found. Replacing new data with old.')
+          // console.log('existingOffer: ', existingOffer)
+          // console.log('nftOffer: ', nftOffer)
 
-            // Replace the server data with the existing data.
-            currentOffer = existingOffer
-            break
-          }
-        }
-        combinedOffers.push(currentOffer)
-
-        // Add an tempory icon if this is a new Offer.
-        if (!currentOffer.iconDownloaded) {
-          console.log(`token ${currentOffer.tokenId} needs icon download 2`)
-          currentOffer.icon = (<Jdenticon size='100' value={currentOffer.tokenId} />)
-          currentOffer.iconDownloaded = false
+          // Replace the server data with the existing data.
+          currentOffer = existingOffer
+          break
         }
       }
+      combinedOffers.push(currentOffer)
 
-      return combinedOffers
-    } catch (err) {
-      console.warn('Error in getOffers() ', err)
+      // Add an tempory icon if this is a new Offer.
+      if (!currentOffer.iconDownloaded) {
+        console.log(`token ${currentOffer.tokenId} needs icon download 2`)
+        currentOffer.icon = (<Jdenticon size='100' value={currentOffer.tokenId} />)
+        currentOffer.iconDownloaded = false
+
+        // Convert sats to BCH, and then calculate cost in USD.
+        const bchjs = this.state.appData.bchWallet.bchjs
+        const rateInSats = parseInt(currentOffer.rateInBaseUnit)
+        // console.log('rateInSats: ', rateInSats)
+        const bchCost = bchjs.BitcoinCash.toBitcoinCash(rateInSats)
+        // console.log('bchCost: ', bchCost)
+        // console.log('bchUsdPrice: ', this.state.appData.bchUsdPrice)
+        let usdPrice = bchCost * this.state.appData.bchWalletState.bchUsdPrice * currentOffer.numTokens
+        usdPrice = bchjs.Util.floor2(usdPrice)
+        const priceStr = `$${usdPrice.toFixed(2)}`
+        currentOffer.usdPrice = priceStr
+      }
     }
+
+    return combinedOffers
   }
 
   // This function generates a Token Card for each token in the wallet.
@@ -181,37 +234,27 @@ class NFTs extends React.Component {
   // It replaces the autogenerated token icons with proper icons, downloaded
   // from the internet.
   async lazyLoadTokenIcons () {
-    const tokens = this.state.offers
+    const offers = this.state.offers
     // console.log(`lazy loading these tokens: ${JSON.stringify(tokens, null, 2)}`)
 
     const wallet = this.state.appData.bchWallet
 
-    for (let i = 0; i < tokens.length; i++) {
-      const thisToken = tokens[i]
+    for (let i = 0; i < offers.length; i++) {
+      const thisOffer = offers[i]
       let tokenFound = false
 
       // console.log(`thisToken: ${JSON.stringify(thisToken, null, 2)}`)
 
       // Get the token data from psf-slp-indexer
-      const tokenData = await wallet.getTokenData(thisToken.tokenId)
+      const tokenData = await wallet.getTokenData(thisOffer.tokenId)
       // console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
 
-      if (!thisToken.iconDownloaded) {
-        console.log(`token ${thisToken.tokenId} needs icon download`)
+      if (!thisOffer.iconDownloaded) {
+        console.log(`token ${thisOffer.tokenId} needs icon download`)
       }
 
-      // If the URL property of the token has an IPFS CID, then it probably
-      // follows the PS002 specification for tokens. Download the token icon
-      // and replace the Jdenticon automatically-generated icon.
-      // if (tokenData.mutableData.includes('ipfs://') && thisToken.iconNeedsDownload) {
-      // const wallet = this.state.appData.bchWallet
-
-      // Retrieve token data from psf-slp-indexer.
-      // const tokenData = await wallet.getTokenData(thisToken.tokenId)
-      // console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
-
       // If the token has mutable data, then try to retrieve it from IPFS.
-      if (!thisToken.iconDownloaded && tokenData.mutableData && tokenData.mutableData.includes('ipfs://')) {
+      if (!thisOffer.iconDownloaded && tokenData.mutableData && tokenData.mutableData.includes('ipfs://')) {
         const cid = tokenData.mutableData.substring(7)
         // console.log('cid')
 
@@ -225,21 +268,21 @@ class NFTs extends React.Component {
         const tokenIcon = mutableData.tokenIcon
 
         const newIcon = (
-          <Card.Img src={tokenIcon} style={{ width: '100px' }} />
+          <Card.Img src={tokenIcon} />
         )
 
         tokenFound = true
 
         // Add the JSX for the icon to the token object.
-        thisToken.icon = newIcon
+        thisOffer.icon = newIcon
+        thisOffer.mutableData = mutableData
       }
-      // }
 
       // If the token does not have mutable data to store icon data,
       // Check the slp-token-icon GitHub repository for an icon:
       // https://github.com/kosinusbch/slp-token-icons
-      if (!tokenFound && !thisToken.iconDownloaded) {
-        const url = `https://tokens.bch.sx/100/${thisToken.tokenId}.png`
+      if (!tokenFound && !thisOffer.iconDownloaded) {
+        const url = `https://tokens.bch.sx/250/${thisOffer.tokenId}.png`
         // console.log('url: ', url)
 
         // Check to see if icon exists. If it doesn't, axios will throw an error
@@ -248,29 +291,31 @@ class NFTs extends React.Component {
           await axios.get(url)
 
           const newIcon = (
-            <Card.Img src={url} style={{ width: '100px' }} />
+            <Card.Img src={url} />
           )
 
           // Add the JSX for the icon to the token object.
-          thisToken.icon = newIcon
+          thisOffer.icon = newIcon
         } catch (err) {
           /* exit quietly */
         }
       }
 
       // Signal that a token download has been attempted.
-      thisToken.iconDownloaded = true
+      thisOffer.iconDownloaded = true
 
       // Add the token data from the indexer
-      thisToken.tokenData = tokenData
+      thisOffer.tokenData = tokenData
+
+      // Trigger a render with the new token icon.
+      this.setState({ offers })
     }
 
     // Update the state of the wallet with the balances
     // this.state.appData.updateBchWalletState({ slpTokens: tokens })
 
     this.setState({
-      iconsAreLoaded: true,
-      tokens
+      iconsAreLoaded: true
     })
   }
 }

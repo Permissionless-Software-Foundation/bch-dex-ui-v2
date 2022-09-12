@@ -201,11 +201,11 @@ class Offers extends React.Component {
     try {
       const options = {
         method: 'GET',
-        url: `${SERVER}offer/list/`,
+        url: `${SERVER}offer/list/all/0`,
         data: {}
       }
       const result = await axios.request(options)
-      // console.log('result.data: ', result.data)
+      console.log('result.data: ', result.data)
 
       return result.data
     } catch (err) {
