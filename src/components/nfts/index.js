@@ -104,13 +104,14 @@ class NFTs extends React.Component {
     // console.log('existingOffers: ', existingOffers)
 
     const newOffers = await this.getNftOffers(nextPage)
-    console.log('newOffers: ', newOffers)
+    // console.log('newOffers: ', newOffers)
 
     const offers = this.combineOffers(newOffers)
-    console.log('handleNextPage combined offers: ', offers)
+    // console.log('handleNextPage combined offers: ', offers)
 
     this.setState({
-      offers
+      offers,
+      page: nextPage
     })
 
     this.lazyLoadTokenIcons()
@@ -120,6 +121,12 @@ class NFTs extends React.Component {
     try {
       const offers = await this.getNftOffers()
       // console.log('offers: ', offers)
+
+      // for (let i = 0; i < offers.length; i++) {
+      //   const thisOffer = offers[i]
+      //
+      //   thisOffer.icon = (<Jdenticon size='100' value={thisOffer.tokenId} />)
+      // }
 
       this.setState({
         offers
@@ -142,6 +149,8 @@ class NFTs extends React.Component {
       // console.log('result.data: ', result.data)
 
       const rawOffers = result.data
+
+      rawOffers.map(x => x.icon = (<Jdenticon size='100' value={x.tokenId} />))
 
       return rawOffers
     } catch (err) {
@@ -180,7 +189,8 @@ class NFTs extends React.Component {
       // Add an tempory icon if this is a new Offer.
       if (!thisOffer.iconDownloaded) {
         console.log(`token ${thisOffer.tokenId} needs icon download 2`)
-        thisOffer.icon = (<Jdenticon size='100' value={thisOffer.tokenId} />)
+        // thisOffer.icon = (<Jdenticon size='100' value={thisOffer.tokenId} />)
+        thisOffer.icon = (<Spinner animation='border' />)
         thisOffer.iconDownloaded = false
 
         // Convert sats to BCH, and then calculate cost in USD.
@@ -246,6 +256,10 @@ class NFTs extends React.Component {
 
       // console.log(`thisOffer: ${JSON.stringify(thisOffer, null, 2)}`)
 
+      if (!thisOffer.iconDownloaded) {
+        console.log(`token ${thisOffer.tokenId} needs icon download`)
+      }
+
       let tokenData = thisOffer.tokenData
       if (!tokenData) {
         // Get the token data from psf-slp-indexer
@@ -255,10 +269,6 @@ class NFTs extends React.Component {
       // Get the token data from psf-slp-indexer
       // const tokenData = await wallet.getTokenData(thisOffer.tokenId)
       // console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
-
-      if (!thisOffer.iconDownloaded) {
-        console.log(`token ${thisOffer.tokenId} needs icon download`)
-      }
 
       // If the token has mutable data, then try to retrieve it from IPFS.
       if (!thisOffer.iconDownloaded && tokenData.mutableData && tokenData.mutableData.includes('ipfs://')) {
@@ -304,7 +314,7 @@ class NFTs extends React.Component {
           // Add the JSX for the icon to the token object.
           thisOffer.icon = newIcon
         } catch (err) {
-          /* exit quietly */
+          thisOffer.icon = (<Jdenticon size='100' value={thisOffer.tokenId} />)
         }
       }
 
