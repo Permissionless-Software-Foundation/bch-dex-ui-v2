@@ -16,6 +16,7 @@ import SlpTokens from '../slp-tokens'
 import ServerSelectView from '../servers/select-server-view'
 import Sweep from '../sweep'
 import Offers from '../offers'
+import NFTs from '../nfts'
 
 // let _this
 
@@ -51,14 +52,16 @@ class AppBody extends React.Component {
 
     switch (menuState) {
       case 0:
-        return (<Offers appData={this.state.appData} />)
+        return (<NFTs appData={this.state.appData} />)
       case 1:
-        return (<BchSend appData={this.state.appData} />)
+        return (<Offers appData={this.state.appData} />)
       case 2:
-        return (<SlpTokens appData={this.state.appData} />)
+        return (<BchSend appData={this.state.appData} />)
       case 3:
-        return (<Sweep appData={this.state.appData} />)
+        return (<SlpTokens appData={this.state.appData} />)
       case 4:
+        return (<Sweep appData={this.state.appData} />)
+      case 5:
         return (
           <BchWallet
             appData={this.state.appData}
@@ -69,7 +72,7 @@ class AppBody extends React.Component {
       case 100:
         return (<ServerSelectView appData={this.state.appData} />)
       default:
-        return (<Offers appData={this.state.appData} />)
+        return (<NFTs appData={this.state.appData} />)
     }
   }
 }
