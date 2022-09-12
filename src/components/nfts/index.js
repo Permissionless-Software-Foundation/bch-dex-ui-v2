@@ -243,7 +243,7 @@ class NFTs extends React.Component {
       const thisOffer = offers[i]
       let tokenFound = false
 
-      // console.log(`thisToken: ${JSON.stringify(thisToken, null, 2)}`)
+      // console.log(`thisOffer: ${JSON.stringify(thisOffer, null, 2)}`)
 
       // Get the token data from psf-slp-indexer
       const tokenData = await wallet.getTokenData(thisOffer.tokenId)

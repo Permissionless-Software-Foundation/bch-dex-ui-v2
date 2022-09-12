@@ -34,7 +34,7 @@ class NavMenu extends React.Component {
           <Navbar.Collapse id='responsive-navbar-nav'>
             <Nav className='mr-auto' style={{ padding: '25px' }}>
               <Nav.Link href='#' onClick={() => this.handleClickEvent(0)}>NFTs</Nav.Link>
-              <Nav.Link href='#' onClick={() => this.handleClickEvent(1)}>Tokens</Nav.Link>
+              <Nav.Link href='#' onClick={() => this.handleClickEvent(1)}>Fungible Tokens</Nav.Link>
               <Nav.Link href='#' onClick={() => this.handleClickEvent(2)}>BCH</Nav.Link>
               <Nav.Link href='#' onClick={() => this.handleClickEvent(3)}>Tokens</Nav.Link>
               <Nav.Link href='#' onClick={() => this.handleClickEvent(4)}>Sweep</Nav.Link>
