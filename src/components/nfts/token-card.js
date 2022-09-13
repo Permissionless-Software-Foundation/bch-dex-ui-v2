@@ -28,9 +28,9 @@ function TokenCard (props) {
       <Col xs={12} sm={6} lg={4} style={{ padding: '25px' }}>
         <Card>
           <Card.Body style={{ textAlign: 'center' }}>
-            {
-              props.token.icon
-            }
+            <a href={imageLink} target='_blank' rel='noreferrer'>
+              {props.token.icon}
+            </a>
             <Card.Title style={{ textAlign: 'center' }}>
               <h4>{props.token.ticker}</h4>
             </Card.Title>
@@ -55,7 +55,7 @@ function TokenCard (props) {
                 </Col>
 
                 <Col>
-                  <Button href={imageLink} target='_blank'>View</Button>
+                  <Button href={imageLink} target='_blank' variant='danger'>Flag</Button>
                 </Col>
 
                 <Col>

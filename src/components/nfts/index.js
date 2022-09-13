@@ -39,10 +39,8 @@ class NFTs extends React.Component {
     // Retrieve initial offer data
     await this.handleOffers()
 
-    await this.lazyLoadTokenIcons()
-
-    const oldInterval = this.state.reloadInterval
-    clearInterval(oldInterval)
+    // const oldInterval = this.state.reloadInterval
+    // clearInterval(oldInterval)
 
     // Get data and update the table periodically.
     // const reloadInterval = setInterval(async () => {
@@ -104,13 +102,17 @@ class NFTs extends React.Component {
     // console.log('existingOffers: ', existingOffers)
 
     const newOffers = await this.getNftOffers(nextPage)
-    console.log('newOffers: ', newOffers)
+    // console.log('newOffers: ', newOffers)
+
+    // Exit if there are no new offers.
+    if (!newOffers.length) return
 
     const offers = this.combineOffers(newOffers)
-    console.log('handleNextPage combined offers: ', offers)
+    // console.log('handleNextPage combined offers: ', offers)
 
     this.setState({
-      offers
+      offers,
+      page: nextPage
     })
 
     this.lazyLoadTokenIcons()
@@ -124,6 +126,8 @@ class NFTs extends React.Component {
       this.setState({
         offers
       })
+
+      await this.lazyLoadTokenIcons()
     } catch (err) {
       console.error('Error in handleOffers: ', err)
       // Do NOT throw errors
@@ -143,6 +147,27 @@ class NFTs extends React.Component {
 
       const rawOffers = result.data
 
+      // Add a default icon.
+      // rawOffers.map(x => x.icon = (<Jdenticon size='100' value={x.tokenId} />))
+      for (let i = 0; i < rawOffers.length; i++) {
+        const thisOffer = rawOffers[i]
+
+        thisOffer.icon = (<Jdenticon size='100' value={thisOffer.tokenId} />)
+        thisOffer.iconDownloaded = false
+
+        // Convert sats to BCH, and then calculate cost in USD.
+        const bchjs = this.state.appData.bchWallet.bchjs
+        const rateInSats = parseInt(thisOffer.rateInBaseUnit)
+        // console.log('rateInSats: ', rateInSats)
+        const bchCost = bchjs.BitcoinCash.toBitcoinCash(rateInSats)
+        // console.log('bchCost: ', bchCost)
+        // console.log('bchUsdPrice: ', this.state.appData.bchUsdPrice)
+        let usdPrice = bchCost * this.state.appData.bchWalletState.bchUsdPrice * thisOffer.numTokens
+        usdPrice = bchjs.Util.floor2(usdPrice)
+        const priceStr = `$${usdPrice.toFixed(2)}`
+        thisOffer.usdPrice = priceStr
+      }
+
       return rawOffers
     } catch (err) {
       console.error('Error in getOffers() ', err)
@@ -152,55 +177,57 @@ class NFTs extends React.Component {
 
   // This function takes in an array of new Offers and combines it with the
   // array of existing offers in the app state.
-  combineOffers (newOffers) {
+  combineOffers (serverOffers) {
     const existingOffers = this.state.offers
-    const combinedOffers = []
+    const unseenOffers = []
 
-    console.log('existingOffers: ', existingOffers)
-
-    // Combine the new offers and the existing offers
-    const allOffers = existingOffers.concat(newOffers)
+    // console.log('existingOffers: ', existingOffers)
+    // console.log('serverOffers: ', serverOffers)
 
     // Loop through each array. Skip the ones that already exist in the
     // existingOffers array.
-    for (let i = 0; i < allOffers.length; i++) {
-      const thisOffer = allOffers[i]
-      let currentOffer = thisOffer
+    for (let i = 0; i < serverOffers.length; i++) {
+      const thisOffer = serverOffers[i]
+      let existingFound = false
 
       for (let j = 0; j < existingOffers.length; j++) {
         const existingOffer = existingOffers[j]
 
+        // Handles the case of the server giving the same offer in two different
+        // page requests.
         if (thisOffer.tokenId === existingOffer.tokenId) {
-          // console.log('Existing offer found. Replacing new data with old.')
-          // console.log('existingOffer: ', existingOffer)
-          // console.log('nftOffer: ', nftOffer)
-
-          // Replace the server data with the existing data.
-          currentOffer = existingOffer
+          existingFound = true
           break
         }
       }
-      combinedOffers.push(currentOffer)
+      if (existingFound) continue
 
       // Add an tempory icon if this is a new Offer.
-      if (!currentOffer.iconDownloaded) {
-        console.log(`token ${currentOffer.tokenId} needs icon download 2`)
-        currentOffer.icon = (<Jdenticon size='100' value={currentOffer.tokenId} />)
-        currentOffer.iconDownloaded = false
+      if (!thisOffer.iconDownloaded) {
+        console.log(`token ${thisOffer.tokenId} needs icon download 2`)
+        // thisOffer.icon = (<Jdenticon size='100' value={thisOffer.tokenId} />)
+        thisOffer.icon = (<Spinner animation='border' />)
+        thisOffer.iconDownloaded = false
 
         // Convert sats to BCH, and then calculate cost in USD.
         const bchjs = this.state.appData.bchWallet.bchjs
-        const rateInSats = parseInt(currentOffer.rateInBaseUnit)
-        // console.log('rateInSats: ', rateInSats)
+        const rateInSats = parseInt(thisOffer.rateInBaseUnit)
+        console.log('rateInSats: ', rateInSats)
         const bchCost = bchjs.BitcoinCash.toBitcoinCash(rateInSats)
-        // console.log('bchCost: ', bchCost)
-        // console.log('bchUsdPrice: ', this.state.appData.bchUsdPrice)
-        let usdPrice = bchCost * this.state.appData.bchWalletState.bchUsdPrice * currentOffer.numTokens
+        console.log('bchCost: ', bchCost)
+        console.log('bchUsdPrice: ', this.state.appData.bchUsdPrice)
+        let usdPrice = bchCost * this.state.appData.bchWalletState.bchUsdPrice * thisOffer.numTokens
         usdPrice = bchjs.Util.floor2(usdPrice)
         const priceStr = `$${usdPrice.toFixed(2)}`
-        currentOffer.usdPrice = priceStr
+        thisOffer.usdPrice = priceStr
       }
+
+      unseenOffers.push(thisOffer)
     }
+
+    // console.log('unseenOffers: ', unseenOffers)
+
+    const combinedOffers = existingOffers.concat(unseenOffers)
 
     return combinedOffers
   }
@@ -245,13 +272,19 @@ class NFTs extends React.Component {
 
       // console.log(`thisOffer: ${JSON.stringify(thisOffer, null, 2)}`)
 
-      // Get the token data from psf-slp-indexer
-      const tokenData = await wallet.getTokenData(thisOffer.tokenId)
-      // console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
-
       if (!thisOffer.iconDownloaded) {
         console.log(`token ${thisOffer.tokenId} needs icon download`)
       }
+
+      let tokenData = thisOffer.tokenData
+      if (!tokenData) {
+        // Get the token data from psf-slp-indexer
+        tokenData = await wallet.getTokenData(thisOffer.tokenId)
+      }
+
+      // Get the token data from psf-slp-indexer
+      // const tokenData = await wallet.getTokenData(thisOffer.tokenId)
+      // console.log(`tokenData: ${JSON.stringify(tokenData, null, 2)}`)
 
       // If the token has mutable data, then try to retrieve it from IPFS.
       if (!thisOffer.iconDownloaded && tokenData.mutableData && tokenData.mutableData.includes('ipfs://')) {
@@ -297,7 +330,7 @@ class NFTs extends React.Component {
           // Add the JSX for the icon to the token object.
           thisOffer.icon = newIcon
         } catch (err) {
-          /* exit quietly */
+          thisOffer.icon = (<Jdenticon size='100' value={thisOffer.tokenId} />)
         }
       }
 
