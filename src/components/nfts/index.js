@@ -104,6 +104,9 @@ class NFTs extends React.Component {
     const newOffers = await this.getNftOffers(nextPage)
     // console.log('newOffers: ', newOffers)
 
+    // Exit if there are no new offers.
+    if (!newOffers.length) return
+
     const offers = this.combineOffers(newOffers)
     // console.log('handleNextPage combined offers: ', offers)
 
@@ -145,7 +148,25 @@ class NFTs extends React.Component {
       const rawOffers = result.data
 
       // Add a default icon.
-      rawOffers.map(x => x.icon = (<Jdenticon size='100' value={x.tokenId} />))
+      // rawOffers.map(x => x.icon = (<Jdenticon size='100' value={x.tokenId} />))
+      for (let i = 0; i < rawOffers.length; i++) {
+        const thisOffer = rawOffers[i]
+
+        thisOffer.icon = (<Jdenticon size='100' value={thisOffer.tokenId} />)
+        thisOffer.iconDownloaded = false
+
+        // Convert sats to BCH, and then calculate cost in USD.
+        const bchjs = this.state.appData.bchWallet.bchjs
+        const rateInSats = parseInt(thisOffer.rateInBaseUnit)
+        // console.log('rateInSats: ', rateInSats)
+        const bchCost = bchjs.BitcoinCash.toBitcoinCash(rateInSats)
+        // console.log('bchCost: ', bchCost)
+        // console.log('bchUsdPrice: ', this.state.appData.bchUsdPrice)
+        let usdPrice = bchCost * this.state.appData.bchWalletState.bchUsdPrice * thisOffer.numTokens
+        usdPrice = bchjs.Util.floor2(usdPrice)
+        const priceStr = `$${usdPrice.toFixed(2)}`
+        thisOffer.usdPrice = priceStr
+      }
 
       return rawOffers
     } catch (err) {
@@ -191,10 +212,10 @@ class NFTs extends React.Component {
         // Convert sats to BCH, and then calculate cost in USD.
         const bchjs = this.state.appData.bchWallet.bchjs
         const rateInSats = parseInt(thisOffer.rateInBaseUnit)
-        // console.log('rateInSats: ', rateInSats)
+        console.log('rateInSats: ', rateInSats)
         const bchCost = bchjs.BitcoinCash.toBitcoinCash(rateInSats)
-        // console.log('bchCost: ', bchCost)
-        // console.log('bchUsdPrice: ', this.state.appData.bchUsdPrice)
+        console.log('bchCost: ', bchCost)
+        console.log('bchUsdPrice: ', this.state.appData.bchUsdPrice)
         let usdPrice = bchCost * this.state.appData.bchWalletState.bchUsdPrice * thisOffer.numTokens
         usdPrice = bchjs.Util.floor2(usdPrice)
         const priceStr = `$${usdPrice.toFixed(2)}`
