@@ -39,10 +39,8 @@ class NFTs extends React.Component {
     // Retrieve initial offer data
     await this.handleOffers()
 
-    await this.lazyLoadTokenIcons()
-
-    const oldInterval = this.state.reloadInterval
-    clearInterval(oldInterval)
+    // const oldInterval = this.state.reloadInterval
+    // clearInterval(oldInterval)
 
     // Get data and update the table periodically.
     // const reloadInterval = setInterval(async () => {
@@ -122,15 +120,11 @@ class NFTs extends React.Component {
       const offers = await this.getNftOffers()
       // console.log('offers: ', offers)
 
-      // for (let i = 0; i < offers.length; i++) {
-      //   const thisOffer = offers[i]
-      //
-      //   thisOffer.icon = (<Jdenticon size='100' value={thisOffer.tokenId} />)
-      // }
-
       this.setState({
         offers
       })
+
+      await this.lazyLoadTokenIcons()
     } catch (err) {
       console.error('Error in handleOffers: ', err)
       // Do NOT throw errors
@@ -150,6 +144,7 @@ class NFTs extends React.Component {
 
       const rawOffers = result.data
 
+      // Add a default icon.
       rawOffers.map(x => x.icon = (<Jdenticon size='100' value={x.tokenId} />))
 
       return rawOffers
