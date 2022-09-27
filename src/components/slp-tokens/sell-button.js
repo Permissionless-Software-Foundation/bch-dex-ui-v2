@@ -24,7 +24,11 @@ class SellButton extends React.Component {
       statusMsg: '',
       hideSpinner: true,
       token: props.token,
-      appData: props.appData
+      appData: props.appData,
+
+      // Function from parent View component. Called after sell tokens,
+      // to trigger a refresh of the wallet token balances.
+      refreshTokens: props.refreshTokens
     }
 
     // Bind this variable to event handlers.
@@ -216,10 +220,12 @@ class SellButton extends React.Component {
   }
 
   // Handle closing the modal.
-  handleClose () {
+  async handleClose () {
     this.setState({
       show: false
     })
+
+    await this.state.refreshTokens()
   }
 
   // Handle opening the modal.
