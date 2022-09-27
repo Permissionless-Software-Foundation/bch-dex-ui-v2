@@ -18,13 +18,20 @@ class SellButton extends React.Component {
     super(props)
 
     this.state = {
-      show: false,
       sellQty: '',
       pricePerToken: '',
+      token: props.token,
+      appData: props.appData,
+
+      // Modal state
+      show: false,
       statusMsg: '',
       hideSpinner: true,
-      token: props.token,
-      appData: props.appData
+      denyClose: false,
+
+      // Function from parent View component. Called after sell tokens,
+      // to trigger a refresh of the wallet token balances.
+      refreshTokens: props.refreshTokens
     }
 
     // Bind this variable to event handlers.
@@ -131,7 +138,8 @@ class SellButton extends React.Component {
     try {
       this.setState({
         statusMsg,
-        hideSpinner: false
+        hideSpinner: false,
+        denyClose: true
       })
 
       // const wallet = this.state.appData.avaxWallet
@@ -203,23 +211,29 @@ class SellButton extends React.Component {
         hideSpinner: true,
         sendQtyStr: '',
         pricePerTokenStr: '',
-        shouldRefreshOnModalClose: true
+        shouldRefreshOnModalClose: true,
+        denyClose: false
       })
     } catch (err) {
       console.error('Error in handleSendTokens(): ', err)
 
       this.setState({
         statusMsg: `Error selling tokens: ${err.message}`,
-        hideSpinner: true
+        hideSpinner: true,
+        denyClose: false
       })
     }
   }
 
   // Handle closing the modal.
-  handleClose () {
-    this.setState({
-      show: false
-    })
+  async handleClose () {
+    if (!this.state.denyClose) {
+      this.setState({
+        show: false
+      })
+
+      await this.state.refreshTokens()
+    }
   }
 
   // Handle opening the modal.

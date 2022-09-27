@@ -44,7 +44,11 @@ function TokenCard (props) {
                 </Col>
 
                 <Col>
-                  <SellButton token={props.token} appData={props.appData} />
+                  <SellButton
+                    token={props.token}
+                    appData={props.appData}
+                    refreshTokens={props.refreshTokens}
+                  />
                 </Col>
 
                 <Col>
