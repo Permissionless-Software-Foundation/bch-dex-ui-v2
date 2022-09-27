@@ -25,7 +25,8 @@ class BuyNftButton extends React.Component {
       // Modal
       showModal: false,
       modalBody: [],
-      hideSpinner: false
+      hideSpinner: false,
+      denyClose: false
     }
 
     // Bind this object to event handlers
@@ -38,7 +39,12 @@ class BuyNftButton extends React.Component {
         <Button variant='success' onClick={(e) => this.handleBuy(e)}>Buy</Button>
         {
           this.state.showModal
-            ? <WaitingModal heading='Buying Token' body={this.state.modalBody} hideSpinner={this.state.hideSpinner} />
+            ? <WaitingModal
+                heading='Buying Token'
+                body={this.state.modalBody}
+                hideSpinner={this.state.hideSpinner}
+                denyClose={this.state.denyClose}
+              />
             : null
         }
       </>
@@ -56,7 +62,8 @@ class BuyNftButton extends React.Component {
       this.setState({
         showModal: true,
         modalBody: ['Generating Counter Offer...', '(This can take a couple minutes)'],
-        hideSpinner: false
+        hideSpinner: false,
+        denyClose: true
       })
 
       const options = {
@@ -79,15 +86,18 @@ class BuyNftButton extends React.Component {
       modalBody.push('The money has not yet left your wallet! It is still under your control.')
       modalBody.push('If the sellers node is online, they will accept the Counter Offer you just generated in a few minutes.')
       modalBody.push('If the tokens never show up, you can sweep the funds back into your wallet.')
+
       this.setState({
         modalBody,
-        hideSpinner: true
+        hideSpinner: true,
+        denyClose: false
       })
     } catch (err) {
       this.setState({
         showModal: true,
         modalBody: ['Error!', `${err.message}`],
-        hideSpinner: true
+        hideSpinner: true,
+        denyClose: false
       })
     }
   }
