@@ -23,7 +23,8 @@ class RefreshTokenBalance extends React.Component {
       shouldTokensBeRefreshed: props.shouldTokensBeRefreshed,
       modalBody: [],
       hideSpinner: false,
-      hideWaitingModal: true
+      hideWaitingModal: true,
+      denyClose: false
     }
 
     // Function handle for downloading token icons. Passed from parent component.
@@ -43,7 +44,12 @@ class RefreshTokenBalance extends React.Component {
         {
           this.state.hideWaitingModal
             ? null
-            : (<WaitingModal heading='Refreshing Token List' body={this.state.modalBody} hideSpinner={this.state.hideSpinner} />)
+            : (<WaitingModal
+                heading='Refreshing Token List'
+                body={this.state.modalBody}
+                hideSpinner={this.state.hideSpinner}
+                denyClose={this.state.denyClose}
+               />)
         }
       </>
     )
@@ -53,7 +59,10 @@ class RefreshTokenBalance extends React.Component {
   async handleRefreshBalance () {
     try {
       // Throw up the waiting modal
-      this.setState({ hideWaitingModal: false })
+      this.setState({
+        hideWaitingModal: false,
+        denyClose: true
+      })
 
       this.addToModal('Updating token balance...')
 
@@ -94,6 +103,7 @@ class RefreshTokenBalance extends React.Component {
       this.setState({
         // Hide waiting modal
         hideWaitingModal: true,
+        denyClose: false,
 
         // Update the token data for this View
         appData: newAppData,
@@ -113,7 +123,8 @@ class RefreshTokenBalance extends React.Component {
 
       this.setState({
         modalBody: this.modalBody,
-        hideSpinner: true
+        hideSpinner: true,
+        denyClose: false
       })
     }
   }
