@@ -28,6 +28,7 @@ class SellButton extends React.Component {
       statusMsg: '',
       hideSpinner: true,
       denyClose: false,
+      shouldRefreshOnModalClose: false,
 
       // Function from parent View component. Called after sell tokens,
       // to trigger a refresh of the wallet token balances.
@@ -139,7 +140,8 @@ class SellButton extends React.Component {
       this.setState({
         statusMsg,
         hideSpinner: false,
-        denyClose: true
+        denyClose: true,
+        shouldRefreshOnModalClose: false
       })
 
       // const wallet = this.state.appData.avaxWallet
@@ -192,7 +194,7 @@ class SellButton extends React.Component {
         numTokens: qty
       }
 
-      statusMsg = 'Submitting order to bch-dex API (this can take a minute)...'
+      statusMsg = 'Submitting order to bch-dex API (this can take a few minutes)...'
       console.log(statusMsg)
       this.setState({ statusMsg })
 
@@ -232,7 +234,11 @@ class SellButton extends React.Component {
         show: false
       })
 
-      await this.state.refreshTokens()
+      if (this.state.shouldRefreshOnModalClose) {
+        await this.state.refreshTokens()
+
+        this.setState({ shouldRefreshOnModalClose: false })
+      }
     }
   }
 
