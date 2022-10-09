@@ -144,10 +144,11 @@ class Offers extends React.Component {
       // console.log('rateInSats: ', rateInSats)
       const bchCost = bchjs.BitcoinCash.toBitcoinCash(rateInSats)
       // console.log('bchCost: ', bchCost)
-      // console.log('bchUsdPrice: ', this.state.appData.bchUsdPrice)
-      let usdPrice = bchCost * this.state.appData.bchWalletState.bchUsdPrice * thisOffer.numTokens
-      usdPrice = bchjs.Util.floor2(usdPrice)
-      const priceStr = `$${usdPrice.toFixed(2)}`
+      // console.log('this.state.appData.bchWalletState.bchUsdPrice: ', this.state.appData.bchWalletState.bchUsdPrice)
+      // console.log('bchUsdPrice: ', this.state.appData.bchWalletState.bchUsdPrice)
+      const usdPrice = bchCost * this.state.appData.bchWalletState.bchUsdPrice
+      // usdPrice = bchjs.Util.floor2(usdPrice)
+      const priceStr = `$${usdPrice.toFixed(3)}`
       thisOffer.usdPrice = priceStr
 
       offers.push(thisOffer)
@@ -209,7 +210,7 @@ class Offers extends React.Component {
         data: {}
       }
       const result = await axios.request(options)
-      console.log('result.data: ', result.data)
+      // console.log('result.data: ', result.data)
 
       return result.data
     } catch (err) {

@@ -50,7 +50,7 @@
     "@capacitor/cli": "latest",
     "@capacitor/clipboard": "4.0.1",
     "@capacitor/core": "latest",
-    "minimal-slp-wallet": "5.0.3",
+    "minimal-slp-wallet": "5.2.1",
     "standard": "17.0.0",
     "web3.storage": "4.3.0"
   },

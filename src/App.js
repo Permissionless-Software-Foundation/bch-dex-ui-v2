@@ -124,6 +124,7 @@ class App extends React.Component {
       // Get the SLP tokens held by the wallet.
       this.addToModal('Getting BCH spot price in USD')
       await this.asyncLoad.getUSDExchangeRate(bchWallet, this.updateBchWalletState)
+      // console.log('this.state.appData.bchUsdPrice')
 
       // Close the modal once initialization is done.
       this.setState({
