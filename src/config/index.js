@@ -3,8 +3,7 @@
 */
 
 const config = {
-  // server: 'http://localhost:5700',
-  server: 'http://5.161.125.64:5700',
+  server: process.env.SERVER ? process.env.SERVER : 'http://localhost:5700',
 
   // Default IPFS CID for the app. This will be overwritten by dynamic lookup.
   ipfsCid: 'bafybeifyeg6y425zsatd6r2l4iwevr2gklzn5hhv7l5f4xxfit7it6nqri',
