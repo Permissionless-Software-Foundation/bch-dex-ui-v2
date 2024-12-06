@@ -190,7 +190,7 @@ class SellButton extends React.Component {
         tokenId: this.state.token.tokenId,
         buyOrSell: 'sell',
         rateInBaseUnit: satsPerToken,
-        minUnitsToExchange: satsPerToken * qty,
+        minUnitsToExchange: Math.ceil(satsPerToken * qty),
         numTokens: qty
       }
 
