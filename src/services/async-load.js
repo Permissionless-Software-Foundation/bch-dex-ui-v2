@@ -138,7 +138,8 @@ class AsyncLoad {
   async getIpfsData (ipfsUri) {
     const cid = ipfsUri.slice(7)
 
-    const downloadUrl = `https://${cid}.ipfs.dweb.link/data.json`
+    // const downloadUrl = `https://${cid}.ipfs.dweb.link/data.json`
+    const downloadUrl = `https://pin.fullstack.cash/ipfs/download/${cid}/data.json`
 
     const response = await axios.get(downloadUrl)
     const data = response.data

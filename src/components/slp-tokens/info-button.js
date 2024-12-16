@@ -21,7 +21,7 @@ function linkIfUrl (url) {
     // Convert to a Filecoin link if its an IPFS reference.
 
     const cid = url.substring(7)
-    url = (<a href={`https://${cid}.ipfs.dweb.link/data.json`} target='_blank' rel='noreferrer'>{url}</a>)
+    url = (<a href={`https://pin.fullstack.cash/ipfs/download/${cid}/data.json`} target='_blank' rel='noreferrer'>{url}</a>)
   }
 
   return url

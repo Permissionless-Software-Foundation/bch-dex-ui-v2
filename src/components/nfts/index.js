@@ -292,7 +292,8 @@ class NFTs extends React.Component {
         // console.log('cid')
 
         // Retrieve the mutable data from Filecoin/IPFS.
-        const url = `https://${cid}.ipfs.dweb.link/data.json`
+        // const url = `https://${cid}.ipfs.dweb.link/data.json`
+        const url = `https://pin.fullstack.cash/ipfs/download/${cid}/data.json`
         const result = await axios.get(url)
 
         const mutableData = result.data
@@ -301,7 +302,7 @@ class NFTs extends React.Component {
         const tokenIcon = mutableData.tokenIcon
 
         const newIcon = (
-          <Card.Img src={tokenIcon} />
+          <Card.Img src={tokenIcon} style={{width: '200px'}} />
         )
 
         tokenFound = true

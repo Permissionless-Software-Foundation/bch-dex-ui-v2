@@ -107,9 +107,19 @@ class SlpTokens extends React.Component {
           const cid = tokenData.mutableData.substring(7)
           // console.log('cid')
 
-          // Retrieve the mutable data from Filecoin/IPFS.
-          const url = `https://${cid}.ipfs.dweb.link/data.json`
-          const result = await axios.get(url)
+          let result = {}
+          try {
+            // Retrieve the mutable data from Filecoin/IPFS.
+            // const url = `https://${cid}.ipfs.dweb.link/data.json`
+            const url = `https://pin.fullstack.cash/ipfs/download/${cid}/data.json`
+            result = await axios.get(url)
+          } catch(err) {
+            console.error(`Error downloading icon for ${cid}: `, err)
+            // Signal that a token download has been attempted.
+            thisToken.iconNeedsDownload = false
+            continue
+          }
+
 
           const mutableData = result.data
           // console.log(`mutableData: ${JSON.stringify(mutableData, null, 2)}`)

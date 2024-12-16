@@ -55,7 +55,9 @@ class BuyNftButton extends React.Component {
     try {
       console.log('Buy button clicked.')
 
-      const targetOffer = this.state.offer.p2wdbHash
+      console.log('this.state.offer: ', this.state.offer)
+
+      const targetOffer = this.state.offer.nostrEventId
       console.log('targetOffer: ', targetOffer)
 
       // Initialize modal
@@ -70,18 +72,19 @@ class BuyNftButton extends React.Component {
         method: 'post',
         url: `${SERVER}offer/take`,
         data: {
-          offerCid: targetOffer
+          nostrEventId: targetOffer
         }
       }
 
       const result = await axios.request(options)
-      // console.log('result.data: ', result.data)
-      const p2wdbHash = result.data.hash
+      console.log('result.data: ', result.data)
+      // const p2wdbHash = result.data.hash
+      const noteId = result.data.noteId
 
       // Add link to output
       const modalBody = []
       modalBody.push('Success!')
-      modalBody.push(<a href={`https://p2wdb.fullstack.cash/entry/hash/${p2wdbHash}`} target='_blank' rel='noreferrer'>P2WDB Entry</a>)
+      modalBody.push(<a href={`https://astral.psfoundation.info/${noteId}`} target='_blank' rel='noreferrer'>Nostr Entry</a>)
       modalBody.push('What happens next:')
       modalBody.push('The money has not yet left your wallet! It is still under your control.')
       modalBody.push('If the sellers node is online, they will accept the Counter Offer you just generated in a few minutes.')
@@ -93,6 +96,7 @@ class BuyNftButton extends React.Component {
         denyClose: false
       })
     } catch (err) {
+      console.log('err: ', err)
       this.setState({
         showModal: true,
         modalBody: ['Error!', `${err.message}`],

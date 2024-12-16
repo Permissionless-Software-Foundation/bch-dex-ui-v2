@@ -204,12 +204,12 @@ class SellButton extends React.Component {
         data: { order }
       }
       const result = await axios(options)
-      // console.log('result.data: ', result.data)
+      console.log('result.data: ', result.data)
 
-      const p2wdbHash = result.data.hash
+      const noteId = result.data.noteId
 
       this.setState({
-        statusMsg: (<p><b>Success!</b> Offer Created and updated to <a href={`https://p2wdb.fullstack.cash/entry/hash/${p2wdbHash}`} target='_blank' rel='noreferrer'>P2WDB</a>!</p>),
+        statusMsg: (<p><b>Success!</b> Offer Created and updated to <a href={`https://astral.psfoundation.info/${noteId}`} target='_blank' rel='noreferrer'>Nostr Post</a>!</p>),
         hideSpinner: true,
         sendQtyStr: '',
         pricePerTokenStr: '',
