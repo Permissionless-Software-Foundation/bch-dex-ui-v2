@@ -3,7 +3,7 @@
 */
 
 const config = {
-  server: process.env.SERVER ? process.env.SERVER : 'http://localhost:5700',
+  server: process.env.SERVER ? process.env.SERVER : 'https://dex-api.fullstack.cash',
 
   // Default IPFS CID for the app. This will be overwritten by dynamic lookup.
   ipfsCid: 'bafybeih7wtrx5laqxbivogcqo6llpotwuhgwz7wjdahbn4y7irhdktymiy',
